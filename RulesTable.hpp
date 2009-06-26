@@ -27,6 +27,16 @@ enum RulesTableStatus
 };
 
 template<typename Value>
+class RulesTable0; 
+
+template<typename StreamType, typename Value>
+StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
+{
+	os << "=>\t" << rulesTable._value; 
+	return os;
+}
+
+template<typename Value>
 class RulesTable0 
 {
 public:
@@ -41,12 +51,9 @@ public:
 		return RULES_TABLE_FOUND;
 	}
 
-	friend templete<typename StreamType, typename Value>
-	StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
-	{
-		os << "=>\t" << rulesTable._value; 
-		return os;
-	}
+	template <typename StreamType, typename Value>
+	friend StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable);
+
 	Value _value;
 };
 
