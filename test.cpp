@@ -7,7 +7,9 @@ using namespace std;
 int main ()
 {
 	RulesTable2<int, int, int> table;
-	table._rules[1]._rules[1] = 1;
-	cout << table._rules[1]._rules[1] << endl;
+	int i = 0;
+	table.setRule(1, 1, 1);
+	cout << table.getRule(1,1,i) << i << endl;
+	cout << (table[1][1]) << endl;
 	return 0;
 }
