@@ -6,13 +6,17 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/arithmetic/dec.hpp>
+#include <boost/preprocessor/facilities/identity.hpp>
+#include <boost/preprocessor/control/if.hpp>
+#include <boost/preprocessor/control/if.hpp>
+#include <boost/preprocessor/facilities/empty.hpp>
 
 #include<map>
 #include<sstream>
 using namespace std;
 
 #ifndef MAX_RULES_TABLE_PARAMS
-#define MAX_RULES_TABLE_PARAMS 3
+#define MAX_RULES_TABLE_PARAMS 10 
 #endif
 
 enum RulesTableReturn
@@ -47,7 +51,7 @@ public:
 		os << "=>\t";
 		if (NULL != value)
 		{
-			os << value ;
+			os << *value ;
 		}
 		os << endl;
 	}
@@ -69,7 +73,16 @@ StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
 }
 
 //terible thing begins
-#define GEN_ARRAY_INDEX(z, n, key) [BOOST_PP_CAT(key, n)]
+
+//set default value, n*n complex, split a 'n' here :-)
+#define DECL_SET_DEFAULT_VALUE(z, m, unused) \
+	void setDefaultRule(BOOST_PP_ENUM_BINARY_PARAMS(m, const Key, &key) BOOST_PP_COMMA_IF(m) const Value& value)\
+	{\
+		BOOST_PP_IF(m, \
+		BOOST_PP_IDENTITY(this->_rules[key0].setDefaultRule(BOOST_PP_ENUM_SHIFTED_PARAMS(m, key) BOOST_PP_COMMA_IF(BOOST_PP_DEC(m)) value);), \
+		BOOST_PP_IDENTITY(_value = value;_status = RULES_TABLE_STATUS_WITH_DEFAULT;))()\
+	}\
+
 
 
 #define DECL_RULES_TABLE(z, n, unused) \
@@ -107,6 +120,10 @@ typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED
 		}\
 		if (RULES_TABLE_STATUS_WITH_DEFAULT == _status)\
 		{\
+			if (!first)\
+			{\
+				for(int i = 0; i < nTab; i++){os << "[-]\t"; }\
+			}\
 			toDefaultString(os, nTab, &_value);\
 		}\
 	}\
@@ -120,6 +137,8 @@ typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED
 	{\
 		_rules[key0].setRule(BOOST_PP_ENUM_SHIFTED_PARAMS(n, key) BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) value); \
 	}\
+\
+BOOST_PP_REPEAT(n,DECL_SET_DEFAULT_VALUE, ~)\
 \
 	int getRule(BOOST_PP_ENUM_BINARY_PARAMS(n, const Key, &key), Value& value)\
 	{\
