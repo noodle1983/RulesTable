@@ -160,8 +160,15 @@ BOOST_PP_REPEAT(n,DECL_SET_DEFAULT_VALUE, ~)\
 		}\
 		return ret;\
 	}\
+	Value getRule(BOOST_PP_ENUM_BINARY_PARAMS(n, const Key, &key)) \
+	{\
+		Value value;\
+		getRule(BOOST_PP_ENUM_PARAMS(n, key), value);\
+		return value;\
+	}\
 \
 	typename SUB_MAP_TYPE& operator[] (const Key0& key0) {return _rules[key0];} \
+private:\
 	map<Key0, typename SUB_MAP_TYPE> _rules; \
 	Value _value; \
 	int   _status; \
