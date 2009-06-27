@@ -8,6 +8,7 @@
 #include <boost/preprocessor/arithmetic/dec.hpp>
 
 #include<map>
+#include<sstream>
 using namespace std;
 
 #ifndef MAX_RULES_TABLE_PARAMS
@@ -27,16 +28,6 @@ enum RulesTableStatus
 };
 
 template<typename Value>
-class RulesTable0; 
-
-template<typename StreamType, typename Value>
-StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
-{
-	os << "=>\t" << rulesTable._value; 
-	return os;
-}
-
-template<typename Value>
 class RulesTable0 
 {
 public:
@@ -51,26 +42,79 @@ public:
 		return RULES_TABLE_FOUND;
 	}
 
+	static void toDefaultString(ostringstream& os, int nTab, Value* value)
+	{
+		os << "=>\t";
+		if (NULL != value)
+		{
+			os << value ;
+		}
+		os << endl;
+	}
+	void toString(ostringstream& os, int nTab, Value* value)
+	{
+		os << "=>\t" << _value << endl;
+	}
+
 	template <typename StreamType, typename Value>
 	friend StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable);
 
 	Value _value;
 };
+template<typename StreamType, typename Value>
+StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
+{
+	os << "=>\t" << rulesTable._value; 
+	return os;
+}
 
 //terible thing begins
 #define GEN_ARRAY_INDEX(z, n, key) [BOOST_PP_CAT(key, n)]
 
 
 #define DECL_RULES_TABLE(z, n, unused) \
-template <typename Value, BOOST_PP_ENUM_PARAMS(n, typename Key)> \
+template <BOOST_PP_ENUM_PARAMS(n, typename Key), typename Value> \
 class BOOST_PP_CAT(RulesTable, n) \
 { \
 public: \
-typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<Value BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) BOOST_PP_ENUM_SHIFTED_PARAMS(n, Key) >  SUB_MAP_TYPE;  \
+typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED_PARAMS(n, Key) BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) Value >  SUB_MAP_TYPE;  \
 \
 	BOOST_PP_CAT(RulesTable, n)() \
 		: _status(RULES_TABLE_STATUS_NO_DEFAULT) \
 	{}\
+\
+	template <typename StreamType, BOOST_PP_ENUM_PARAMS(n, typename Key), typename Value> \
+	friend StreamType & operator << (StreamType& os, BOOST_PP_CAT(RulesTable, n)<BOOST_PP_ENUM_PARAMS(n, Key), Value>& rulesTable);\
+	void toString(ostringstream& os, int nTab, Value* value)\
+	{\
+		if (NULL != value) \
+		{\
+			toDefaultString(os, nTab, value);\
+			return;\
+		}\
+		int first = 1;\
+		map<Key0, typename SUB_MAP_TYPE>::iterator it = _rules.begin();\
+		map<Key0, typename SUB_MAP_TYPE>::iterator end = _rules.end();\
+		for(;it != end; it++) \
+		{\
+			if (!first)\
+			{\
+				for(int i = 0; i < nTab; i++){os << "[-]\t"; }\
+			}\
+			os << "[" << it->first <<"]\t";\
+			it->second.toString(os, nTab + 1, value);\
+			first = 0;\
+		}\
+		if (RULES_TABLE_STATUS_WITH_DEFAULT == _status)\
+		{\
+			toDefaultString(os, nTab, &_value);\
+		}\
+	}\
+	static void toDefaultString(ostringstream& os, int nTab, Value* value)\
+	{\
+		os << "[N/A]\t";\
+		SUB_MAP_TYPE::toDefaultString(os, nTab + 1, value);\
+	}\
 \
 	void setRule(BOOST_PP_ENUM_BINARY_PARAMS(n, const Key, &key), const Value& value)\
 	{\
@@ -103,6 +147,14 @@ typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<Value BOOST_PP_COMMA_
 	Value _value; \
 	int   _status; \
 }; \
+template <typename StreamType, BOOST_PP_ENUM_PARAMS(n, typename Key), typename Value> \
+StreamType & operator << (StreamType& os, BOOST_PP_CAT(RulesTable, n)<BOOST_PP_ENUM_PARAMS(n, Key), Value>& rulesTable)\
+{\
+	ostringstream ostr;\
+	rulesTable.toString(ostr, 0, NULL);\
+	os << ostr.str();\
+	return  os;\
+}\
 
 BOOST_PP_REPEAT_FROM_TO(1, MAX_RULES_TABLE_PARAMS, DECL_RULES_TABLE, ~)
 //#define BOOST_PP_LOCAL_MACRO (n) DECL_RULES_TABLE(~, n, ~)
