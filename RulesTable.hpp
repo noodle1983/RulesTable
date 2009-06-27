@@ -35,6 +35,13 @@ template<typename Value>
 class RulesTable0 
 {
 public:
+	RulesTable0(){}
+	RulesTable0(const Value value):_value(value){}
+	RulesTable0(const RulesTable0<Value>& table):_value(table.getRule()){}
+	RulesTable0<Value> operator = (const RulesTable0<Value>& table){_value = table.getRule();return *this;}
+	RulesTable0<Value> operator = (const Value& value){_value = value;return *this;}
+	Value operator Value() {return _value;}
+
 	void setRule(const Value& value)
 	{
 		_value = value;
@@ -44,6 +51,11 @@ public:
 	{
 		value = _value;
 		return RULES_TABLE_FOUND;
+	}
+
+	Value getRule() const 
+	{
+		return _value;
 	}
 
 	static void toDefaultString(ostringstream& os, int nTab, Value* value)
@@ -63,12 +75,13 @@ public:
 	template <typename StreamType, typename Value>
 	friend StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable);
 
+private:
 	Value _value;
 };
 template<typename StreamType, typename Value>
 StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
 {
-	os << "=>\t" << rulesTable._value; 
+	os << rulesTable._value; 
 	return os;
 }
 

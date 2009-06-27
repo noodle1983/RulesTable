@@ -1,10 +1,10 @@
 
 CC=CC
 cc=cc
-CXXFLAGS=-I. -I/workdir/release/ACE_wrappers/include -I/workdir/release/boost_1_39_0/include/boost-1_39
+CXXFLAGS=-I. -I/workdir/release/boost_1_39_0/include/boost-1_39
 CFLAGs=
-LDFLAGS=-L/workdir/release/ACE_wrappers/lib
-LIB=-lACE
+LDFLAGS=
+LIB=
 
 TARGET=a.out
 
