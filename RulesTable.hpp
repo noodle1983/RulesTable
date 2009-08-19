@@ -40,7 +40,7 @@ public:
 	RulesTable0(const RulesTable0<Value>& table):_value(table.getRule()){}
 	RulesTable0<Value> operator = (const RulesTable0<Value>& table){_value = table.getRule();return *this;}
 	RulesTable0<Value> operator = (const Value& value){_value = value;return *this;}
-	Value operator Value() {return _value;}
+	operator Value() {return _value;}
 
 	void setRule(const Value& value)
 	{
