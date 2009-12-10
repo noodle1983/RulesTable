@@ -32,7 +32,7 @@ enum RulesTableStatus
 };
 
 template<typename Value>
-class RulesTable0 
+class RulesTable0
 {
 public:
 	RulesTable0(){}
