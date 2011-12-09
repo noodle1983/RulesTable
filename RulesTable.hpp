@@ -72,18 +72,16 @@ public:
 		os << "=>\t" << _value << endl;
 	}
 
-	template <typename StreamType, typename Value>
-	friend StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable);
+	template <typename StreamType>
+	friend StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
+	{
+		os << rulesTable._value; 
+		return os;
+	}
 
 private:
 	Value _value;
 };
-template<typename StreamType, typename Value>
-StreamType & operator << (StreamType& os, RulesTable0<Value>& rulesTable)
-{
-	os << rulesTable._value; 
-	return os;
-}
 
 //terible thing begins
 
@@ -103,14 +101,20 @@ template <BOOST_PP_ENUM_PARAMS(n, typename Key), typename Value> \
 class BOOST_PP_CAT(RulesTable, n) \
 { \
 public: \
-typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED_PARAMS(n, Key) BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) Value >  SUB_MAP_TYPE;  \
+typedef BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED_PARAMS(n, Key) BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) Value >  SUB_MAP_TYPE;  \
 \
 	BOOST_PP_CAT(RulesTable, n)() \
 		: _status(RULES_TABLE_STATUS_NO_DEFAULT) \
 	{}\
 \
-	template <typename StreamType, BOOST_PP_ENUM_PARAMS(n, typename Key), typename Value> \
-	friend StreamType & operator << (StreamType& os, BOOST_PP_CAT(RulesTable, n)<BOOST_PP_ENUM_PARAMS(n, Key), Value>& rulesTable);\
+	template <typename StreamType> \
+	friend StreamType & operator << (StreamType& os, BOOST_PP_CAT(RulesTable, n)<BOOST_PP_ENUM_PARAMS(n, Key), Value>& rulesTable)\
+	{\
+		ostringstream ostr;\
+		rulesTable.toString(ostr, 0, NULL);\
+		os << ostr.str();\
+		return  os;\
+	}\
 	void toString(ostringstream& os, int nTab, Value* value)\
 	{\
 		if (NULL != value) \
@@ -119,8 +123,8 @@ typedef typename BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED
 			return;\
 		}\
 		int first = 1;\
-		map<Key0, typename SUB_MAP_TYPE>::iterator it = _rules.begin();\
-		map<Key0, typename SUB_MAP_TYPE>::iterator end = _rules.end();\
+		typename map<Key0, SUB_MAP_TYPE>::iterator it = _rules.begin();\
+		typename map<Key0, SUB_MAP_TYPE>::iterator end = _rules.end();\
 		for(;it != end; it++) \
 		{\
 			if (!first)\
@@ -156,7 +160,7 @@ BOOST_PP_REPEAT(n,DECL_SET_DEFAULT_VALUE, ~)\
 	int getRule(BOOST_PP_ENUM_BINARY_PARAMS(n, const Key, &key), Value& value)\
 	{\
 		int ret = RULES_TABLE_NOT_FOUND; \
-		map<Key0, typename SUB_MAP_TYPE>::iterator lb = _rules.lower_bound(key0); \
+		typename map<Key0, SUB_MAP_TYPE>::iterator lb = _rules.lower_bound(key0); \
 		if (lb != _rules.end()\
 				&& key0 == lb->first)\
 		{\
@@ -180,20 +184,12 @@ BOOST_PP_REPEAT(n,DECL_SET_DEFAULT_VALUE, ~)\
 		return value;\
 	}\
 \
-	typename SUB_MAP_TYPE& operator[] (const Key0& key0) {return _rules[key0];} \
+	SUB_MAP_TYPE& operator[] (const Key0& key0) {return _rules[key0];} \
 private:\
-	map<Key0, typename SUB_MAP_TYPE> _rules; \
+	map<Key0, SUB_MAP_TYPE> _rules; \
 	Value _value; \
 	int   _status; \
 }; \
-template <typename StreamType, BOOST_PP_ENUM_PARAMS(n, typename Key), typename Value> \
-StreamType & operator << (StreamType& os, BOOST_PP_CAT(RulesTable, n)<BOOST_PP_ENUM_PARAMS(n, Key), Value>& rulesTable)\
-{\
-	ostringstream ostr;\
-	rulesTable.toString(ostr, 0, NULL);\
-	os << ostr.str();\
-	return  os;\
-}\
 
 BOOST_PP_REPEAT_FROM_TO(1, MAX_RULES_TABLE_PARAMS, DECL_RULES_TABLE, ~)
 //#define BOOST_PP_LOCAL_MACRO (n) DECL_RULES_TABLE(~, n, ~)
