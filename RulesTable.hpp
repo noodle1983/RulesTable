@@ -11,7 +11,7 @@
 #include <boost/preprocessor/control/if.hpp>
 #include <boost/preprocessor/facilities/empty.hpp>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include<sstream>
 
 #ifndef MAX_RULES_TABLE_PARAMS
@@ -128,8 +128,8 @@ typedef BOOST_PP_CAT(RulesTable, BOOST_PP_DEC(n))<BOOST_PP_ENUM_SHIFTED_PARAMS(n
 			return;\
 		}\
 		int first = 1;\
-		typename boost::unordered_map<Key0, SUB_MAP_TYPE>::iterator it = _rules.begin();\
-		typename boost::unordered_map<Key0, SUB_MAP_TYPE>::iterator end = _rules.end();\
+		typename std::unordered_map<Key0, SUB_MAP_TYPE>::iterator it = _rules.begin();\
+		typename std::unordered_map<Key0, SUB_MAP_TYPE>::iterator end = _rules.end();\
 		for(;it != end; it++) \
 		{\
 			if (!first)\
@@ -165,7 +165,7 @@ BOOST_PP_REPEAT(n,DECL_SET_DEFAULT_VALUE, ~)\
 	int getRule(BOOST_PP_ENUM_BINARY_PARAMS(n, const Key, &key), Value& value)\
 	{\
 		int ret = RULES_TABLE_NOT_FOUND; \
-		typename boost::unordered_map<Key0, SUB_MAP_TYPE>::iterator lb = _rules.find(key0); \
+		typename std::unordered_map<Key0, SUB_MAP_TYPE>::iterator lb = _rules.find(key0); \
 		if (lb != _rules.end())\
 		{\
 			ret = lb->second.getRule(BOOST_PP_ENUM_SHIFTED_PARAMS(n, key) BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) value); \
@@ -190,7 +190,7 @@ BOOST_PP_REPEAT(n,DECL_SET_DEFAULT_VALUE, ~)\
 \
 	SUB_MAP_TYPE& operator[] (const Key0& key0) {return _rules[key0];} \
 private:\
-	boost::unordered_map<Key0, SUB_MAP_TYPE> _rules; \
+	std::unordered_map<Key0, SUB_MAP_TYPE> _rules; \
 	Value _value; \
 	int   _status; \
 }; \

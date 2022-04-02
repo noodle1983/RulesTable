@@ -1,22 +1,24 @@
 
-CC=CC
-cc=cc
-CXXFLAGS=-I. -I/workdir/release/boost_1_39_0/include/boost-1_39
+CC=g++
+cc=gcc
+CXXFLAGS=-I. -std=c++11
 CFLAGs=
 LDFLAGS=
 LIB=
-
-TARGET=a.out
 
 CPPFILES=$(wildcard *.cpp)
 
 OBJECTS=$(patsubst %.cpp, %.o, $(CPPFILES))
 
-$(TARGET):$(OBJECTS)
-	$(CC) -o $(TARGET) $(LDFLAGS) $(LIB) $(OBJECTS)
+TARGET=$(patsubst %.cpp, %.out, $(CPPFILES))
 
-%.o:%.cpp
-	$(CC) $(CXXFLAGS) -o $@ -c $< 
+%.out:%.cpp
+	$(CC) $(CXXFLAGS) -o $@  $< 
+
+all:$(TARGET)
+
+depend:
+	$(CC) $(CXXFLAGS) -MM test.cpp 
 
 clean:
 	rm -rf $(TARGET)
